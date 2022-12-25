@@ -1,0 +1,5 @@
+FROM mongo-express:0.45
+
+EXPOSE 8081
+
+ENV ME_CONFIG_MONGODB_SERVER=mongo-dev

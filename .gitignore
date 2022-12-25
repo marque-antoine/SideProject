@@ -1,2 +1,4 @@
 database/*
+!database/Dockerfile
 database_admin/*
+!database_admin/Dockerfile
