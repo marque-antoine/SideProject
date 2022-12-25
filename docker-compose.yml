@@ -1,0 +1,65 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_app
+    ports:
+      - '19000:19000'
+      - '19001:19001'
+      - '19002:19002'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend_app
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+  mongo-dev:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: mongo-dev
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    networks: 
+      - mongo-compose-network
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./database:/data/db
+    restart: always
+  database-admin:
+    depends_on:
+      - mongo-dev
+    build:
+      context: ./database_admin
+      dockerfile: Dockerfile
+    container_name: database_admin
+    restart: always
+    ports:
+      - 8081:8081
+    networks: 
+      - mongo-compose-network
+    volumes:
+      - ./database:/data/db
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_MONGODB_URL=mongodb://root:password@mongo-dev:27017/?authSource=admin
+      - ME_CONFIG_BASICAUTH_USERNAME=mexpress
+      - ME_CONFIG_BASICAUTH_PASSWORD=mexpress
+    links:
+      - mongo-dev
+
+networks:
+  mongo-compose-network:
+    driver: bridge
